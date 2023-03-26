@@ -1,0 +1,42 @@
+{% load custom_tags %}
+
+{% if table_data and columns %}
+<table border="1">
+    <thead>
+        <tr>
+            {% for column in columns %}
+            <th>
+                <label for="{{ column }}">{{ column }}</label>
+                <input type="checkbox" name="{{ column }}" id="{{ column }}" class="column-checkbox">
+            </th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in table_data %}
+        <tr>
+            {% for column in columns %}
+            <td>{{ row|get:column }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+            <a href="#" data-page="1">&laquo; primeira</a>
+            <a href="#" data-page="{{ page_obj.previous_page_number }}">anterior</a>
+        {% endif %}
+
+            <span class="current">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+            <a href="#" data-page="{{ page_obj.next_page_number }}">próxima</a>
+            <a href="#" data-page="{{ page_obj.paginator.num_pages }}">última &raquo;</a>
+        {% endif %}
+        </span>
+    </div>
+{% endif %}

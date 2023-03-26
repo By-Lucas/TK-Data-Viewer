@@ -14,7 +14,7 @@
 
 {% if table_data and columns %}
     <h2>Tabela importada</h2>
-
+    <div id="data-table-container">
     <form method="POST" action="{% url 'remove_duplicates' %}">
         {% csrf_token %}
         <input type="hidden" name="table_data" value="{{ table_data|jsonify }}">
@@ -29,28 +29,19 @@
         <label for="remove_column">Remover coluna</label>
         <input type="checkbox" name="remove_column" id="remove_column">
         <br>
+        <label for="clean_data">Limpar dados(espaços em branco)</label>
+        <input type="checkbox" name="clean_data" id="clean_data">
 
-        <table border="1">
-            <thead>
-                <tr>
-                    {% for column in columns %}
-                    <th>
-                        <label for="{{ column }}">{{ column }}</label>
-                        <input type="checkbox" name="selected_columns" value="{{ column }}" id="{{ column }}">
-                    </th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in table_data %}
-                <tr>
-                    {% for column in columns %}
-                    <td>{{ row|get:column }}</td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <br>
+        <br>
+        <label for="select_all_columns">Selecionar todas as colunas</label>
+        <input type="checkbox" name="select_all_columns" id="select_all_columns">
+
+        
+        <!-- Incluir o conteúdo parcial -->
+        <div id="data-table-container">
+            {% include 'data_viewer/includes/data_table_partial.html' %}
+        </div>
 
         <button type="submit">Aplicar ações</button>
     </form>
@@ -71,6 +62,66 @@
         <button type="submit">Salvar alterações</button>
     </form>
 
-{% endif %}
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="#" class="change-page" data-page="1">&laquo; primeira</a>
+                <a href="#" class="change-page" data-page="{{ page_obj.previous_page_number }}">anterior</a>
+            {% endif %}
+
+            <span class="current">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="#" class="change-page" data-page="{{ page_obj.next_page_number }}">próxima</a>
+                <a href="#" class="change-page" data-page="{{ page_obj.paginator.num_pages }}">última &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+</div>
+
+    {% endif %}
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+    function updateDataTable(page) {
+        console.log(page)
+        $.ajax({
+            type: 'GET',
+            url: "{% url 'ajax_data_pagination' %}",
+            data: {
+                'page': page,
+            },
+            dataType: 'json',
+            success: function (data) {
+                $('#data-table-container').html(data.html_data_table);
+                bindPagination();
+            }
+        });
+    }
+
+    function bindPagination() {
+        $('.pagination a').on('click', function (e) {
+            e.preventDefault();
+            var page = $(this).attr('data-page');
+            updateDataTable(page);
+            
+        });
+    }
+    bindPagination();
+});
+
+
+    document.getElementById('select_all_columns').addEventListener('change', function (event) {
+        let columnCheckboxes = document.getElementsByClassName('column-checkbox');
+        for (let i = 0; i < columnCheckboxes.length; i++) {
+            columnCheckboxes[i].checked = event.target.checked;
+        }
+    });
+</script>
 
 {% endblock body %}

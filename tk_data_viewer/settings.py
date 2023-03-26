@@ -151,6 +151,10 @@ MESSAGE_TAGS = {
     constants.WARNING: 'warning',
 }
 
+# Aumentar o limite para, por exemplo, 50 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
